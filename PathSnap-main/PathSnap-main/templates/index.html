@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PathSnap | Distributed Map-Matching & Route Reconstruction</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background-color: #f4f6f9; font-family: 'Segoe UI', Roboto, sans-serif; }
+        .navbar { background: linear-gradient(135deg, #0d47a1 0%, #1976d2 100%); }
+        .card { border-radius: 10px; border: none; box-shadow: 0 4px 12px rgba(0,0,0,0.06); margin-bottom: 20px; }
+        .metric-card { text-align: center; padding: 20px 10px; border-radius: 8px; }
+        .metric-val { font-size: 2rem; font-weight: 700; }
+        .metric-lbl { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.85; }
+        #map-frame { width: 100%; height: 560px; border: none; border-radius: 8px; }
+        .badge-pill { padding: 6px 12px; border-radius: 20px; font-weight: 500; }
+        .status-dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .status-online { background-color: #00e676; box-shadow: 0 0 8px #00e676; }
+        .status-offline { background-color: #ff1744; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark shadow-sm py-3">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <i class="fa-solid fa-route fa-lg me-3"></i>
+            <div>
+                <span class="fs-5 fw-bold">PATHSNAP</span>
+                <span class="badge bg-light text-primary ms-2">2-Laptop Distributed System</span>
+                <div style="font-size: 0.75rem; opacity: 0.85;">Distributed Map-Matching & Route Reconstruction Evaluator Dashboard</div>
+            </div>
+        </a>
+        <div class="d-flex align-items-center text-white">
+            <span id="conn-status-badge" class="badge bg-dark px-3 py-2">
+                <span id="status-dot" class="status-dot status-offline"></span>
+                <span id="conn-text">Checking API...</span>
+            </span>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 py-4">
+    <div class="row">
+        <!-- Left Control Panel -->
+        <div class="col-lg-4 col-md-5">
+            <!-- Server Config Card -->
+            <div class="card p-3">
+                <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-server me-2"></i>Laptop 1 API Connection</h6>
+                <div class="input-group mb-2">
+                    <span class="input-group-text"><i class="fa-solid fa-network-wired"></i></span>
+                    <input type="text" id="api-url" class="form-control" value="http://localhost:8000" placeholder="http://<laptop1-ip>:8000">
+                    <button class="btn btn-outline-primary" type="button" onclick="checkApiHealth()">Connect</button>
+                </div>
+                <small class="text-muted">Enter Laptop 1's IP address when running across the 2 laptops.</small>
+            </div>
+
+            <!-- Trip Selection & Execution Card -->
+            <div class="card p-3">
+                <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-car me-2"></i>Select Evaluation Trip (1 of 10)</h6>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold text-muted">Reserved Evaluation Trips:</label>
+                    <select id="trip-select" class="form-select form-select-lg">
+                        <option value="">Loading evaluation trips...</option>
+                    </select>
+                </div>
+                <button id="eval-btn" class="btn btn-primary btn-lg w-100 py-2 fw-bold shadow-sm" onclick="runTripEvaluation()">
+                    <i class="fa-solid fa-play me-2"></i>Reconstruct Route & Evaluate
+                </button>
+                <div id="loading-spinner" class="text-center my-3 d-none">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <div class="small text-muted mt-2">Processing candidates, model inference & HMM Viterbi decoding...</div>
+                </div>
+            </div>
+
+            <!-- Detailed Breakdown Card -->
+            <div class="card p-3">
+                <h6 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-chart-line me-2"></i>Evaluation Metrics Breakdown</h6>
+                <table class="table table-sm table-borderless">
+                    <tbody>
+                        <tr>
+                            <td class="text-muted">Selected Trip ID:</td>
+                            <td class="text-end fw-bold" id="res-trip-id">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">GPS Observations:</td>
+                            <td class="text-end fw-bold" id="res-gps-cnt">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Classifier Top-1 Accuracy:</td>
+                            <td class="text-end fw-semibold text-primary" id="res-clf-acc">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><b>HMM Top-1 Accuracy:</b></td>
+                            <td class="text-end fw-bold text-success fs-6" id="res-hmm-acc">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Classifier Continuity:</td>
+                            <td class="text-end fw-semibold text-secondary" id="res-clf-cont">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted"><b>HMM Route Continuity:</b></td>
+                            <td class="text-end fw-bold text-primary fs-6" id="res-hmm-cont">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Continuity Gain:</td>
+                            <td class="text-end fw-bold text-info" id="res-cont-gain">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">Candidate Miss Rate:</td>
+                            <td class="text-end fw-semibold text-warning" id="res-miss-rate">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">ML Model Latency:</td>
+                            <td class="text-end" id="res-ml-time">-</td>
+                        </tr>
+                        <tr>
+                            <td class="text-muted">HMM Viterbi Latency:</td>
+                            <td class="text-end" id="res-hmm-time">-</td>
+                        </tr>
+                        <tr class="border-top">
+                            <td class="text-muted fw-bold">Total Server Latency:</td>
+                            <td class="text-end fw-bold text-dark" id="res-total-time">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Right Map Display & Summary Cards -->
+        <div class="col-lg-8 col-md-7">
+            <!-- Metric KPI Summary Cards -->
+            <div class="row g-3 mb-3">
+                <div class="col-md-3 col-6">
+                    <div class="card metric-card bg-success text-white shadow-sm">
+                        <div class="metric-val" id="kpi-accuracy">--%</div>
+                        <div class="metric-lbl">Pointwise Accuracy</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card metric-card bg-primary text-white shadow-sm">
+                        <div class="metric-val" id="kpi-continuity">--%</div>
+                        <div class="metric-lbl">Route Continuity</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card metric-card bg-dark text-white shadow-sm">
+                        <div class="metric-val" id="kpi-points">--</div>
+                        <div class="metric-lbl">GPS Points</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="card metric-card bg-info text-white shadow-sm">
+                        <div class="metric-val" id="kpi-latency">-- ms</div>
+                        <div class="metric-lbl">Pipeline Latency</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Folium Interactive Map Container -->
+            <div class="card p-2">
+                <div class="d-flex justify-content-between align-items-center p-2 border-bottom">
+                    <h6 class="fw-bold text-secondary mb-0">
+                        <i class="fa-solid fa-map-location-dot me-2"></i>Interactive Geographical Route Visualizer
+                    </h6>
+                    <span id="map-trip-badge" class="badge bg-secondary">Select a trip and click evaluate</span>
+                </div>
+                <div class="p-1">
+                    <iframe id="map-frame" src="about:blank"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentApiUrl = window.location.origin.includes("localhost") || window.location.origin.includes("127.0.0.1") 
+        ? window.location.origin 
+        : document.getElementById('api-url').value;
+    
+    document.getElementById('api-url').value = currentApiUrl;
+
+    async function checkApiHealth() {
+        const urlInput = document.getElementById('api-url').value.trim().replace(/\/$/, "");
+        currentApiUrl = urlInput;
+        const statusDot = document.getElementById('status-dot');
+        const connText = document.getElementById('conn-text');
+
+        try {
+            const resp = await fetch(`${currentApiUrl}/health`);
+            if (resp.ok) {
+                const data = await resp.json();
+                statusDot.className = "status-dot status-online";
+                connText.innerText = `API Online (${data.model_type})`;
+                loadTrips();
+            } else {
+                throw new Error("HTTP error " + resp.status);
+            }
+        } catch (e) {
+            statusDot.className = "status-dot status-offline";
+            connText.innerText = "API Offline";
+            alert("Could not connect to Laptop 1 API at " + currentApiUrl + ". Make sure the FastAPI server is running.");
+        }
+    }
+
+    async function loadTrips() {
+        try {
+            const resp = await fetch(`${currentApiUrl}/trips`);
+            const data = await resp.json();
+            const select = document.getElementById('trip-select');
+            select.innerHTML = "";
+            data.trips.forEach(tid => {
+                const opt = document.createElement('option');
+                opt.value = tid;
+                opt.innerText = `Evaluation Trip: ${tid}`;
+                select.appendChild(opt);
+            });
+        } catch (e) {
+            console.error("Failed to load trips", e);
+        }
+    }
+
+    async function runTripEvaluation() {
+        const tripId = document.getElementById('trip-select').value;
+        if (!tripId) {
+            alert("Please select a trip first.");
+            return;
+        }
+
+        const btn = document.getElementById('eval-btn');
+        const spinner = document.getElementById('loading-spinner');
+        btn.disabled = true;
+        spinner.classList.remove('d-none');
+
+        try {
+            const resp = await fetch(`${currentApiUrl}/predict/${tripId}`, { method: 'POST' });
+            if (!resp.ok) throw new Error("Evaluation request failed: " + resp.statusText);
+            const data = await resp.json();
+
+            // Update KPI cards
+            document.getElementById('kpi-accuracy').innerText = data.pointwise_top1_accuracy + "%";
+            document.getElementById('kpi-continuity').innerText = data.route_continuity + "%";
+            document.getElementById('kpi-points').innerText = data.gps_observation_count;
+            document.getElementById('kpi-latency').innerText = data.total_latency_ms + " ms";
+
+            // Update details table
+            document.getElementById('res-trip-id').innerText = data.trip_id;
+            document.getElementById('res-gps-cnt').innerText = data.gps_observation_count;
+            document.getElementById('res-clf-acc').innerText = data.classifier_top1_accuracy + "%";
+            document.getElementById('res-hmm-acc').innerText = data.pointwise_top1_accuracy + "%";
+            document.getElementById('res-clf-cont').innerText = data.classifier_continuity + "%";
+            document.getElementById('res-hmm-cont').innerText = data.route_continuity + "%";
+            document.getElementById('res-cont-gain').innerText = (data.continuity_gain > 0 ? "+" : "") + data.continuity_gain + "%";
+            document.getElementById('res-miss-rate').innerText = data.candidate_miss_rate + "%";
+            document.getElementById('res-ml-time').innerText = data.model_inference_ms + " ms";
+            document.getElementById('res-hmm-time').innerText = data.hmm_decoding_ms + " ms";
+            document.getElementById('res-total-time').innerText = data.total_latency_ms + " ms";
+
+            // Update Map View
+            document.getElementById('map-trip-badge').innerText = `Trip: ${tripId} | Accuracy: ${data.pointwise_top1_accuracy}% | Continuity: ${data.route_continuity}%`;
+            document.getElementById('map-frame').src = `${currentApiUrl}/map/${tripId}`;
+
+        } catch (e) {
+            alert("Error during evaluation: " + e.message);
+        } finally {
+            btn.disabled = false;
+            spinner.classList.add('d-none');
+        }
+    }
+
+    // Auto-connect on load
+    window.onload = checkApiHealth;
+</script>
+</body>
+</html>
+

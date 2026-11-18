@@ -1,0 +1,12 @@
+Metric,Train Partition (80 trips),Student Test (10 trips)
+Total Trips,80.0,10.0
+Total GPS Observations,208417.0,19160.0
+Min GPS Points / Trip,361.0,262.0
+Max GPS Points / Trip,19313.0,3958.0
+Mean GPS Points / Trip,2605.2,1916.0
+Median GPS Points / Trip,1529.0,1420.0
+Mean Nodes / Trip,24168.6,9068.9
+Mean Arcs / Trip,48461.3,18504.1
+Mean Route Segments / Trip,391.7,347.7
+Exact 1.0s Sampling Interval (%),96.5,98.62
+Gaps > 2.0s (%),1.41,0.72

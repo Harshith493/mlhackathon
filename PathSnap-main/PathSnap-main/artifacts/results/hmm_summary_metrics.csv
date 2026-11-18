@@ -1,0 +1,3 @@
+Metric,Classifier-Only,Classifier + HMM,Net Improvement
+Pointwise Top-1 Accuracy,81.94%,81.40%,-0.54%
+Route Continuity,89.40%,99.72%,+10.32%

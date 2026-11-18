@@ -1,0 +1,3 @@
+Model Variant,CV Macro F1-score,Student-testing Top-1 Accuracy,Student-testing Macro F1-score,Log Loss,Inference Time
+Untuned HistGradientBoosting (Default),0.8849,82.03%,0.8897,0.0924,394.0 ms/trip
+Tuned HistGradientBoosting (Bayesian TPE),0.8857,81.94%,0.89,0.0919,511.5 ms/trip

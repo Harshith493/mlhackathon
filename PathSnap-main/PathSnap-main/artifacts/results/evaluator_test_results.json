@@ -1,0 +1,102 @@
+[
+  {
+    "trip_id": "00000015",
+    "gps_obs": 6854,
+    "clf_top1_accuracy": 52.22,
+    "clf_route_continuity": 90.98,
+    "hmm_top1_accuracy": 49.07,
+    "hmm_route_continuity": 100.0,
+    "continuity_gain": 9.02,
+    "latency_ms": 11034.1
+  },
+  {
+    "trip_id": "00000017",
+    "gps_obs": 1346,
+    "clf_top1_accuracy": 87.44,
+    "clf_route_continuity": 80.59,
+    "hmm_top1_accuracy": 76.89,
+    "hmm_route_continuity": 97.7,
+    "continuity_gain": 17.1,
+    "latency_ms": 3114.0
+  },
+  {
+    "trip_id": "00000023",
+    "gps_obs": 458,
+    "clf_top1_accuracy": 90.83,
+    "clf_route_continuity": 93.65,
+    "hmm_top1_accuracy": 89.3,
+    "hmm_route_continuity": 97.59,
+    "continuity_gain": 3.94,
+    "latency_ms": 836.6
+  },
+  {
+    "trip_id": "00000030",
+    "gps_obs": 654,
+    "clf_top1_accuracy": 74.92,
+    "clf_route_continuity": 76.72,
+    "hmm_top1_accuracy": 71.1,
+    "hmm_route_continuity": 97.55,
+    "continuity_gain": 20.83,
+    "latency_ms": 1316.9
+  },
+  {
+    "trip_id": "00000049",
+    "gps_obs": 2642,
+    "clf_top1_accuracy": 96.18,
+    "clf_route_continuity": 96.4,
+    "hmm_top1_accuracy": 94.81,
+    "hmm_route_continuity": 99.73,
+    "continuity_gain": 3.33,
+    "latency_ms": 4199.2
+  },
+  {
+    "trip_id": "00000059",
+    "gps_obs": 1031,
+    "clf_top1_accuracy": 90.11,
+    "clf_route_continuity": 85.53,
+    "hmm_top1_accuracy": 82.15,
+    "hmm_route_continuity": 98.45,
+    "continuity_gain": 12.91,
+    "latency_ms": 1653.9
+  },
+  {
+    "trip_id": "00000067",
+    "gps_obs": 916,
+    "clf_top1_accuracy": 65.39,
+    "clf_route_continuity": 94.1,
+    "hmm_top1_accuracy": 59.83,
+    "hmm_route_continuity": 100.0,
+    "continuity_gain": 5.9,
+    "latency_ms": 1344.1
+  },
+  {
+    "trip_id": "00000073",
+    "gps_obs": 1144,
+    "clf_top1_accuracy": 91.43,
+    "clf_route_continuity": 93.26,
+    "hmm_top1_accuracy": 89.16,
+    "hmm_route_continuity": 100.0,
+    "continuity_gain": 6.74,
+    "latency_ms": 1946.4
+  },
+  {
+    "trip_id": "00000087",
+    "gps_obs": 1399,
+    "clf_top1_accuracy": 92.85,
+    "clf_route_continuity": 91.42,
+    "hmm_top1_accuracy": 97.28,
+    "hmm_route_continuity": 100.0,
+    "continuity_gain": 8.58,
+    "latency_ms": 4521.3
+  },
+  {
+    "trip_id": "00000094",
+    "gps_obs": 3230,
+    "clf_top1_accuracy": 71.7,
+    "clf_route_continuity": 87.4,
+    "hmm_top1_accuracy": 67.86,
+    "hmm_route_continuity": 99.94,
+    "continuity_gain": 12.54,
+    "latency_ms": 4619.4
+  }
+]

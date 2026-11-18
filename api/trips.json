@@ -1,0 +1,12 @@
+[
+  { "id": 1, "name": "Trip A", "evaluator_id": "eval-001" },
+  { "id": 2, "name": "Trip B", "evaluator_id": "eval-002" },
+  { "id": 3, "name": "Trip C", "evaluator_id": "eval-003" },
+  { "id": 4, "name": "Trip D", "evaluator_id": "eval-004" },
+  { "id": 5, "name": "Trip E", "evaluator_id": "eval-005" },
+  { "id": 6, "name": "Trip F", "evaluator_id": "eval-006" },
+  { "id": 7, "name": "Trip G", "evaluator_id": "eval-007" },
+  { "id": 8, "name": "Trip H", "evaluator_id": "eval-008" },
+  { "id": 9, "name": "Trip I", "evaluator_id": "eval-009" },
+  { "id": 10, "name": "Trip J", "evaluator_id": "eval-010" }
+]
